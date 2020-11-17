@@ -1,0 +1,10 @@
+See it in docker hub: https://hub.docker.com/repository/docker/mrexox/research-dictionary
+
+How to run:
+
+  $ docker run --rm -it -p 8080 mrexox/research-dictionary
+
+How to use:
+
+  $ curl localhost:8080/microservice
+  > ... the meaning ...
