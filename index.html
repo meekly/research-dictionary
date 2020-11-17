@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Mind Map</title>
+        <script src="https://gojs.net/latest/release/go.js"></script>
+    </head>
+    <body>
+        <div id="myDiagramDiv" class="diagramStyling" style="width:700px; height:800px"></div>
+
+        <script id="code">
+         function init() {
+             var $ = go.GraphObject.make;
+             var myDiagram =
+                 $(go.Diagram, "myDiagramDiv",  // create a Diagram for the DIV HTML element
+                   { // enable undo & redo
+                       "undoManager.isEnabled": true
+                 });
+
+             // define a simple Node template
+             myDiagram.nodeTemplate =
+                 $(go.Node, "Auto",  // the Shape will go around the TextBlock
+                   $(go.Shape, "RoundedRectangle",
+                     { strokeWidth: 0, fill: "white" },  // default fill is white
+                     // Shape.fill is bound to Node.data.color
+                     new go.Binding("fill", "color")),
+                   $(go.TextBlock,
+                     { margin: 8 },  // some room around the text
+                     // TextBlock.text is bound to Node.data.key
+                     new go.Binding("text", "key"))
+                 );
+
+
+             // but use the default Link template, by not setting Diagram.linkTemplate
+             fetch("/research-links.json").then((data) => {
+                 data.json().then(graph => {
+                     keys = [];
+                     connections = [];
+                     for (el in graph) {
+                         if (keys.indexOf(el) == -1) {
+                             keys.push(el);
+                         }
+                         for (val of graph[el]) {
+                             if (keys.indexOf(val) == -1) {
+                                 keys.push(val);
+                             }
+                             connections.push({from: el, to: val});
+                         }
+                     }
+
+
+                     myDiagram.model = new go.GraphLinksModel(
+                         keys.map(k => { return { key: k, color: "orange" } }),
+                         connections
+                     );
+                 });
+             });
+         }
+
+         window.onload = function() {
+             init();
+         }
+        </script>
+    </body>
+</html>
