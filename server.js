@@ -3,14 +3,11 @@ var http = require('http');
 var https = require('https');
 var url = require('url');
 
-var dictionary = {
-    'foo': 'bar'
-};
+var dictionary = {};
 
 var dictionaryHandler = (request, response) => {
-    var u = url.parse(request.url);
-    var key = u.pathname.substr(1)
-    console.log('Request: ' + key);
+    var key = url.parse(request.url).pathname.substr(1);
+
     if (key === 'research-links.json') {
         fs.readFile('research-links.json', (err, data) => {
             response.writeHead(200, {'Content-Type': 'text/json'});
@@ -28,6 +25,7 @@ var dictionaryHandler = (request, response) => {
         return;
     }
 
+    // Searching for definition
     var def = dictionary[key.toUpperCase()];
     if (!def) {
         response.writeHead(404);
@@ -60,7 +58,7 @@ var loadDictionary = (file, callback) => {
             return;
         }
         dictionary = JSON.parse(data);
-        console.log('Dictionary loaded.');
+        console.log('dictionary loaded');
         callback();
     })
 };
