@@ -9,11 +9,26 @@ var dictionary = {
 
 var dictionaryHandler = (request, response) => {
     var u = url.parse(request.url);
-    var key = '';
-    if (u.pathname.length > 0) {
-        key = u.pathname.substr(1).toUpperCase();
+    var key = u.pathname.substr(1)
+    console.log('Request: ' + key);
+    if (key === 'research-links.json') {
+        fs.readFile('research-links.json', (err, data) => {
+            response.writeHead(200, {'Content-Type': 'text/json'});
+            response.write(data);
+            response.end();
+        })
+        return;
     }
-    var def = dictionary[key];
+    else if (key.length === 0) {
+        fs.readFile('index.html', (err, data) => {
+            response.writeHead(200, {'Content-Type': 'text/html'});
+            response.write(data);
+            response.end();
+        })
+        return;
+    }
+
+    var def = dictionary[key.toUpperCase()];
     if (!def) {
         response.writeHead(404);
         response.end(key + ' was not found');
@@ -23,13 +38,13 @@ var dictionaryHandler = (request, response) => {
     response.end(def);
 }
 
-var downloadDictionary = (url, file, callback) => {
+var download = (url, file, callback) => {
   var stream = fs.createWriteStream(file);
   var req = https.get(url, function(res) {
     res.pipe(stream);
     stream.on('finish', function() {
       stream.close(callback);
-      console.log('Dictionary downloaded');
+      console.log(file + ' downloaded');
     });
   }).on('error', function(err) {
     fs.unlink(file);
@@ -50,7 +65,7 @@ var loadDictionary = (file, callback) => {
     })
 };
 
-downloadDictionary('https://meekly.github.io/research-dictionary.json', 'dictionary.json', (err) => {
+download('https://meekly.github.io/research-dictionary.json', 'dictionary.json', (err) => {
     if (err) {
         console.log(err);
         return;
@@ -62,6 +77,13 @@ downloadDictionary('https://meekly.github.io/research-dictionary.json', 'diction
         }
         console.log('ready to serve');
     });
+});
+
+download('https://meekly.github.io/research-links.json', 'research-links.json', (err) => {
+    if (err) {
+        console.log(err);
+        return;
+    }
 });
 
 const server = http.createServer(dictionaryHandler);
